@@ -1,4 +1,5 @@
 const gallaryModel = require('../models/gallary.model')
+const USER = require('../models/user.model')
 exports.addImageInGallary = async (req,res)=>{
     const id=req.params.id
    const data = []
@@ -12,11 +13,16 @@ exports.addImageInGallary = async (req,res)=>{
               data.push({imagesPath:path})
         });
     }
-    console.log(data)
     try {
         const images = await gallaryModel.create(data)
+        const user = await  USER.findOne({_id:id})
+        images.forEach(img=>{
+             user.photoId.push(img._id)
+        })
+        await user.save()
         return res.status(201).send({
-            message:"images add sucessfully!"
+            message:"images add sucessfully!",
+            Photos:images
         })
     }catch(err){
         console.log(err.message)
